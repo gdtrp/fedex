@@ -15,11 +15,11 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class AsyncAPIExecutor implements APIExecutor {
+public class BulkAPIExecutor implements APIExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(AsyncAPIExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(BulkAPIExecutor.class);
     private static final int BULK_QUEUE_CAPACITY = 1000;
-    private final APIExecutor restExecutorService;
+    private final APIExecutor apiExecutor;
     private final ExecutorService service;
     private final ExecutorService bulkExecutorService = Executors.newCachedThreadPool();
     private final Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
@@ -30,9 +30,9 @@ public class AsyncAPIExecutor implements APIExecutor {
     private boolean started = true;
 
 
-    public AsyncAPIExecutor(@Autowired APIExecutor restExecutorService,
-                            @Autowired ExecutorService service) {
-        this.restExecutorService = restExecutorService;
+    public BulkAPIExecutor(@Autowired APIExecutor apiExecutor,
+                           @Autowired ExecutorService service) {
+        this.apiExecutor = apiExecutor;
         this.service = service;
     }
 
@@ -114,7 +114,7 @@ public class AsyncAPIExecutor implements APIExecutor {
                     if (readyToExecute) {
                         final List<SingleRequest> clone = new ArrayList<>(params);
                         service.execute(() -> {
-                            Map<String, P> result = restExecutorService.getValue(path, clone.stream().map(x -> x.request).collect(Collectors.toList()), responseType);
+                            Map<String, P> result = apiExecutor.getValue(path, clone.stream().map(x -> x.request).collect(Collectors.toList()), responseType);
                             logger.info("path {} got result : {}", path, result);
                             clone.forEach(x -> x.setResponse(result != null ? result.get(x.request) : null));
                         });

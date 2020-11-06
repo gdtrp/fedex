@@ -18,15 +18,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-public class ExternalServiceExecutorImpl implements ExternalServiceExecutor {
-    private static final Logger logger = LoggerFactory.getLogger(ExternalServiceExecutorImpl.class);
+public class SyncAPIExecutor implements APIExecutor {
+    private static final Logger logger = LoggerFactory.getLogger(SyncAPIExecutor.class);
     private static final String PARAM_NAME = "q";
     private static final String DELIMITER = ",";
     private final RestTemplate template;
     @Value("${service.host}")
     private String host;
 
-    public ExternalServiceExecutorImpl(@Autowired RestTemplate template) {
+    public SyncAPIExecutor(@Autowired RestTemplate template) {
         this.template = template;
     }
 

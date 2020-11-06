@@ -2,9 +2,9 @@ package com.fedex.assessment.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fedex.assessment.service.rest.BulkExternalServiceExecutor;
-import com.fedex.assessment.service.rest.ExternalServiceExecutor;
-import com.fedex.assessment.service.rest.ExternalServiceExecutorImpl;
+import com.fedex.assessment.service.rest.BulkAPIExecutor;
+import com.fedex.assessment.service.rest.APIExecutor;
+import com.fedex.assessment.service.rest.SyncAPIExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,13 +46,13 @@ public class AssessmentConfiguration {
 
 
     @Bean
-    public ExternalServiceExecutor restExecutorService(@Autowired @Qualifier("restExecutor") ExternalServiceExecutor restExecutorService, @Autowired ExecutorService service) {
-        return enableBulkService ? new BulkExternalServiceExecutor(restExecutorService, service) : restExecutorService;
+    public APIExecutor apiExecutor(@Autowired @Qualifier("restExecutor") APIExecutor restExecutorService, @Autowired ExecutorService service) {
+        return enableBulkService ? new BulkAPIExecutor(restExecutorService, service) : restExecutorService;
     }
 
     @Bean("restExecutor")
-    public ExternalServiceExecutorImpl restExecutorServiceImpl(@Autowired RestTemplate template) {
-        return new ExternalServiceExecutorImpl(template);
+    public SyncAPIExecutor restExecutorServiceImpl(@Autowired RestTemplate template) {
+        return new SyncAPIExecutor(template);
     }
 
     @Bean

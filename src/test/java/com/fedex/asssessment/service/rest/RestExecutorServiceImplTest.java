@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fedex.TestConfig;
 import com.fedex.assessment.model.TrackStatus;
 import com.fedex.assessment.service.TrackService;
-import com.fedex.assessment.service.rest.ExternalServiceExecutorImpl;
+import com.fedex.assessment.service.rest.SyncAPIExecutor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +37,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
         "service.host=http://localhost:8080",
 })
 public class RestExecutorServiceImplTest {
-    @Autowired private ExternalServiceExecutorImpl serviceUtils;
+    @Autowired private SyncAPIExecutor serviceUtils;
 
     private MockRestServiceServer mockServer;
     @Autowired

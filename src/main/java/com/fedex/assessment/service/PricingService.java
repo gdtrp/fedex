@@ -1,6 +1,6 @@
 package com.fedex.assessment.service;
 
-import com.fedex.assessment.service.rest.ExternalServiceExecutor;
+import com.fedex.assessment.service.rest.APIExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Async;
@@ -16,10 +16,10 @@ import java.util.concurrent.Future;
 @Service
 public class PricingService {
     private static final String PRICING_PATH = "/pricing";
-    private final ExternalServiceExecutor restExecutorService;
+    private final APIExecutor apiExecutor;
 
-    public PricingService(@Autowired ExternalServiceExecutor restExecutorService) {
-        this.restExecutorService = restExecutorService;
+    public PricingService(@Autowired APIExecutor apiExecutor) {
+        this.apiExecutor = apiExecutor;
     }
 
     @Async
@@ -27,7 +27,7 @@ public class PricingService {
         if (CollectionUtils.isEmpty(pricing)) {
             return new AsyncResult<>(null);
         }
-        return new AsyncResult<>(restExecutorService.getValue(PRICING_PATH, pricing,
+        return new AsyncResult<>(apiExecutor.getValue(PRICING_PATH, pricing,
                 new ParameterizedTypeReference<HashMap<String, Float>>() {
                 }));
     }

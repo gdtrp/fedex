@@ -1,12 +1,7 @@
 package com.fedex;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fedex.assessment.service.AggregationService;
-import com.fedex.assessment.service.PricingService;
-import com.fedex.assessment.service.ShipmentService;
-import com.fedex.assessment.service.TrackService;
-import com.fedex.assessment.service.rest.ExternalServiceExecutor;
-import com.fedex.assessment.service.rest.ExternalServiceExecutorImpl;
+import com.fedex.assessment.service.rest.SyncAPIExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +25,7 @@ public class TestConfig {
     }
 
     @Bean @Qualifier("executor")
-    ExternalServiceExecutorImpl restExecutorService(@Autowired RestTemplate restTemplate){
-        return new ExternalServiceExecutorImpl(restTemplate);
+    SyncAPIExecutor restExecutorService(@Autowired RestTemplate restTemplate){
+        return new SyncAPIExecutor(restTemplate);
     }
 }

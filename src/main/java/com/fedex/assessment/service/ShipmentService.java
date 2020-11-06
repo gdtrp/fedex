@@ -1,7 +1,7 @@
 package com.fedex.assessment.service;
 
 import com.fedex.assessment.model.ShipmentType;
-import com.fedex.assessment.service.rest.ExternalServiceExecutor;
+import com.fedex.assessment.service.rest.APIExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Async;
@@ -17,10 +17,10 @@ import java.util.concurrent.Future;
 @Service
 public class ShipmentService {
     private static final String SHIPMENT_PATH = "/shipments";
-    private final ExternalServiceExecutor restExecutorService;
+    private final APIExecutor apiExecutor;
 
-    public ShipmentService(@Autowired ExternalServiceExecutor restExecutorService) {
-        this.restExecutorService = restExecutorService;
+    public ShipmentService(@Autowired APIExecutor apiExecutor) {
+        this.apiExecutor = apiExecutor;
     }
 
     @Async
@@ -28,7 +28,7 @@ public class ShipmentService {
         if (CollectionUtils.isEmpty(shipment)) {
             return new AsyncResult<>(null);
         }
-        return new AsyncResult<>(restExecutorService.getValue(SHIPMENT_PATH, shipment,
+        return new AsyncResult<>(apiExecutor.getValue(SHIPMENT_PATH, shipment,
                 new ParameterizedTypeReference<HashMap<String, List<ShipmentType>>>() {
                 }));
     }

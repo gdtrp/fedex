@@ -1,8 +1,8 @@
 package com.fedex.assessment.model;
 
+
 import java.util.List;
 import java.util.Map;
-
 public class Result {
     private Map<String, Float> pricing;
     private Map<String, List<ShipmentType>> shipments;

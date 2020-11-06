@@ -1,7 +1,7 @@
 package com.fedex.assessment.service;
 
 import com.fedex.assessment.model.TrackStatus;
-import com.fedex.assessment.service.rest.ExternalServiceExecutor;
+import com.fedex.assessment.service.rest.APIExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Async;
@@ -17,10 +17,10 @@ import java.util.concurrent.Future;
 @Service
 public class TrackService {
     public static final String TRACKING_PATH = "/track";
-    private final ExternalServiceExecutor restExecutorService;
+    private final APIExecutor apiExecutor;
 
-    public TrackService(@Autowired ExternalServiceExecutor restExecutorService) {
-        this.restExecutorService = restExecutorService;
+    public TrackService(@Autowired APIExecutor apiExecutor) {
+        this.apiExecutor = apiExecutor;
     }
 
     @Async
@@ -28,7 +28,7 @@ public class TrackService {
         if (CollectionUtils.isEmpty(tracking)) {
             return new AsyncResult<>(null);
         }
-        return new AsyncResult<>(restExecutorService.getValue(TRACKING_PATH, tracking,
+        return new AsyncResult<>(apiExecutor.getValue(TRACKING_PATH, tracking,
                 new ParameterizedTypeReference<HashMap<String, TrackStatus>>() {
                 }));
     }
