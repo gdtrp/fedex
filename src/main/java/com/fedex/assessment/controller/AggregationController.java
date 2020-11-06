@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @Validated
-@Api(value = "Aggregation REST Controller", description = "Get aggregated response from pricing, track and shipment services")
+@Api(value = "Aggregation REST Controller")
 public class AggregationController {
     private static Logger logger = LoggerFactory.getLogger(AggregationController.class);
 
@@ -31,7 +31,7 @@ public class AggregationController {
         this.aggregationService = aggregationService;
     }
 
-    @RequestMapping(path= "/aggregation", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path= "/aggregation", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get aggregated response from pricing, track and shipment services", response = Result.class)
     public Result getAggregation(
             @ApiParam(value = "ISO country code list")  @RequestParam(name = "pricing", required = false) List<@IsoCountryCode  String> pricing,

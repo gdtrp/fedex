@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 
 @Service
 public class ShipmentService {
-    private final static String SHIPMENT_PATH = "/shipments";
+    private static final String SHIPMENT_PATH = "/shipments";
     private final ExternalServiceExecutor restExecutorService;
 
     public ShipmentService(@Autowired ExternalServiceExecutor restExecutorService) {

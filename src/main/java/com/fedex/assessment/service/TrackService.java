@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 
 @Service
 public class TrackService {
-    public final static String TRACKING_PATH = "/track";
+    public static final String TRACKING_PATH = "/track";
     private final ExternalServiceExecutor restExecutorService;
 
     public TrackService(@Autowired ExternalServiceExecutor restExecutorService) {

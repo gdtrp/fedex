@@ -16,18 +16,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
-    private final static Logger logger = LoggerFactory.getLogger(BulkExternalServiceExecutor.class);
+
+    private static final  Logger logger = LoggerFactory.getLogger(BulkExternalServiceExecutor.class);
 
 
-    @Value("${service.bulk.size:5}") private int bulkSize;
     @Value("${service.bulk.flushInterval:5}") private int flushInterval;
-    private final static int BULK_QUEUE_CAPACITY = 1000;
-
-    private final ExternalServiceExecutor restExecutorService;
-    private final ExecutorService service;
+    private static final int BULK_QUEUE_CAPACITY = 1000;
 
     private Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
     private boolean started = true;
+
+    private final ExternalServiceExecutor restExecutorService;
+    private final ExecutorService service;
+    @Value("${service.bulk.size:5}") private int bulkSize;
+
+
+
 
     public BulkExternalServiceExecutor(@Autowired ExternalServiceExecutor restExecutorService,
                                        @Autowired ExecutorService service){
@@ -77,7 +81,7 @@ public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
                             if (element != null){
                                 params.addAll(element.singleRequests);
                             }
-                            readyForExecute = params.size() >= bulkSize || (params.size() > 0 && element == null);
+                            readyForExecute = params.size() >= bulkSize || (!params.isEmpty() && element == null);
                         }else{
                             params.addAll(queue.take().singleRequests);
                             readyForExecute = params.size() >=  bulkSize;

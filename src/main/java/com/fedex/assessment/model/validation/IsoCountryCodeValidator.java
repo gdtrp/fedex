@@ -10,7 +10,7 @@ import java.util.Set;
 public class IsoCountryCodeValidator implements
         ConstraintValidator<IsoCountryCode, String> {
 
-    private static final Set<String> ISO_COUNTRIES = new HashSet<String>
+    private static final Set<String> ISO_COUNTRIES = new HashSet<>
             (Arrays.asList(Locale.getISOCountries()));
     @Override
     public boolean isValid(String code, ConstraintValidatorContext constraintValidatorContext) {

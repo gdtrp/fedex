@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 
 @Service
 public class PricingService {
-    private final static String PRICING_PATH = "/pricing";
+    private static final String PRICING_PATH = "/pricing";
     private final ExternalServiceExecutor restExecutorService;
 
     public PricingService(@Autowired ExternalServiceExecutor restExecutorService) {

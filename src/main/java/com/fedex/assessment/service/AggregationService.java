@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 
 @Service
 public class AggregationService {
-    private final static Logger logger = LoggerFactory.getLogger(AggregationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AggregationService.class);
 
     private final PricingService pricingService;
     private final ShipmentService shipmentService;
@@ -39,7 +39,7 @@ public class AggregationService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
-            logger.warn("error during execution {}", e);
+            logger.warn("error during execution", e);
         }
         return result;
     }

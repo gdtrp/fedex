@@ -1,6 +1,5 @@
 package com.fedex.assessment.service.rest;
 
-import com.fedex.assessment.service.PricingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,9 @@ import java.util.stream.Collectors;
 
 
 public class ExternalServiceExecutorImpl implements ExternalServiceExecutor {
-    private final static Logger logger = LoggerFactory.getLogger(PricingService.class);
-    private final static String PARAM_NAME = "q";
-    private final static String DELIMITER = ",";
+    private static final Logger logger = LoggerFactory.getLogger(ExternalServiceExecutorImpl.class);
+    private static final String PARAM_NAME = "q";
+    private static final String DELIMITER = ",";
 
 
     @Value("${service.host}")
