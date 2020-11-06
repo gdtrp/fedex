@@ -15,11 +15,11 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
+public class AsyncAPIExecutor implements APIExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(BulkExternalServiceExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncAPIExecutor.class);
     private static final int BULK_QUEUE_CAPACITY = 1000;
-    private final ExternalServiceExecutor restExecutorService;
+    private final APIExecutor restExecutorService;
     private final ExecutorService service;
     private final ExecutorService bulkExecutorService = Executors.newCachedThreadPool();
     private final Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
@@ -30,8 +30,8 @@ public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
     private boolean started = true;
 
 
-    public BulkExternalServiceExecutor(@Autowired ExternalServiceExecutor restExecutorService,
-                                       @Autowired ExecutorService service) {
+    public AsyncAPIExecutor(@Autowired APIExecutor restExecutorService,
+                            @Autowired ExecutorService service) {
         this.restExecutorService = restExecutorService;
         this.service = service;
     }
