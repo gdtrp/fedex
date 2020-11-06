@@ -1,0 +1,22 @@
+version: "2.1"
+services:
+  fedex-services:
+    container_name: fedex.services
+    networks:
+      hcl-net:
+        ipv4_address: 10.96.0.1
+        aliases: 
+          - fedex-services
+    image: xyzassessment/backend-services
+    ports:
+    - "8080:8080"
+
+
+networks:
+  hcl-net:
+    driver: bridge
+    name: fedex-net
+    ipam:
+      config:
+        - subnet: 10.96.0.0/16
+          gateway: 10.96.0.254
