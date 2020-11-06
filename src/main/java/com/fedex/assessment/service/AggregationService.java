@@ -15,10 +15,18 @@ import java.util.concurrent.Future;
 
 @Service
 public class AggregationService {
-    @Autowired PricingService pricingService;
-    @Autowired ShipmentService shipmentService;
-    @Autowired TrackService trackingService;
-    private Logger logger = LoggerFactory.getLogger(AggregationService.class);
+    private final static Logger logger = LoggerFactory.getLogger(AggregationService.class);
+
+    private final PricingService pricingService;
+    private final ShipmentService shipmentService;
+    private final TrackService trackingService;
+
+    public AggregationService(@Autowired PricingService pricingService,@Autowired ShipmentService shipmentService,@Autowired TrackService trackingService) {
+        this.pricingService = pricingService;
+        this.shipmentService = shipmentService;
+        this.trackingService = trackingService;
+    }
+
     public Result getAggregation(List<String> pricing, List<String> tracking, List<String> shipment){
         Result result = new Result();
         Future<Map<String, Float>> pricingFuture = pricingService.getPricing(pricing);

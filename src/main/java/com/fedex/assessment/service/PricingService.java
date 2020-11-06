@@ -16,7 +16,12 @@ import java.util.concurrent.Future;
 @Service
 public class PricingService {
     private final static String PRICING_PATH = "/pricing";
-    @Autowired private ExternalServiceExecutor restExecutorService;
+    private final ExternalServiceExecutor restExecutorService;
+
+    public PricingService(@Autowired ExternalServiceExecutor restExecutorService) {
+        this.restExecutorService = restExecutorService;
+    }
+
     @Async
     public Future<Map<String, Float>> getPricing(List<String> pricing){
         if (CollectionUtils.isEmpty(pricing)){

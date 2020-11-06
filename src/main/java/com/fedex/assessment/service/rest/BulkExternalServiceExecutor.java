@@ -16,19 +16,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
-    private ExternalServiceExecutor restExecutorService;
+    private final static Logger logger = LoggerFactory.getLogger(BulkExternalServiceExecutor.class);
+
 
     @Value("${service.bulk.size:5}") private int bulkSize;
     @Value("${service.bulk.flushInterval:5}") private int flushInterval;
-    private Logger logger = LoggerFactory.getLogger(BulkExternalServiceExecutor.class);
-    @Autowired
-    private ExecutorService service;
-    private Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
-    private boolean started = true;
     private final static int BULK_QUEUE_CAPACITY = 1000;
 
-    public BulkExternalServiceExecutor(@Autowired ExternalServiceExecutor restExecutorService){
+    private final ExternalServiceExecutor restExecutorService;
+    private final ExecutorService service;
+
+    private Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
+    private boolean started = true;
+
+    public BulkExternalServiceExecutor(@Autowired ExternalServiceExecutor restExecutorService,
+                                       @Autowired ExecutorService service){
         this.restExecutorService = restExecutorService;
+        this.service = service;
     }
     @PreDestroy
     private void shutdown(){

@@ -5,7 +5,10 @@ import com.fedex.assessment.service.AggregationService;
 import com.fedex.assessment.service.PricingService;
 import com.fedex.assessment.service.ShipmentService;
 import com.fedex.assessment.service.TrackService;
+import com.fedex.assessment.service.rest.ExternalServiceExecutor;
 import com.fedex.assessment.service.rest.ExternalServiceExecutorImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScans;
@@ -26,24 +29,8 @@ public class TestConfig {
         return new RestTemplate();
     }
 
-    @Bean
-    ExternalServiceExecutorImpl restExecutorService(){
-        return new ExternalServiceExecutorImpl();
-    }
-    @Bean
-    AggregationService aggregationService(){
-        return new AggregationService();
-    }
-    @Bean
-    PricingService pricingService(){
-        return new PricingService();
-    }
-    @Bean
-    ShipmentService shipmentService(){
-        return new ShipmentService();
-    }
-    @Bean
-    TrackService trackService(){
-        return new TrackService();
+    @Bean @Qualifier("executor")
+    ExternalServiceExecutorImpl restExecutorService(@Autowired RestTemplate restTemplate){
+        return new ExternalServiceExecutorImpl(restTemplate);
     }
 }

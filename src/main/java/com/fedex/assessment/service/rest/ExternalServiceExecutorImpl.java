@@ -20,13 +20,18 @@ import java.util.stream.Collectors;
 
 
 public class ExternalServiceExecutorImpl implements ExternalServiceExecutor {
-    private Logger logger = LoggerFactory.getLogger(PricingService.class);
-    @Value("${service.host}")
-    private String host;
+    private final static Logger logger = LoggerFactory.getLogger(PricingService.class);
     private final static String PARAM_NAME = "q";
     private final static String DELIMITER = ",";
-    @Autowired
-    private RestTemplate template;
+
+
+    @Value("${service.host}")
+    private String host;
+    private final RestTemplate template;
+
+    public ExternalServiceExecutorImpl(@Autowired RestTemplate template){
+        this.template = template;
+    }
     public <P> Map<String, P> getValue(String path, List<String> params, ParameterizedTypeReference<HashMap<String, P>> responseType){
         URI uri = UriComponentsBuilder.fromHttpUrl(host).path(path).queryParam(PARAM_NAME, params.stream().collect(Collectors.joining(DELIMITER))).build().toUri();
         RequestEntity request = RequestEntity.get(uri).accept(MediaType.APPLICATION_JSON).build();

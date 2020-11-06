@@ -16,9 +16,13 @@ import java.util.concurrent.Future;
 
 @Service
 public class ShipmentService {
-
     private final static String SHIPMENT_PATH = "/shipments";
-    @Autowired private ExternalServiceExecutor restExecutorService;
+    private final ExternalServiceExecutor restExecutorService;
+
+    public ShipmentService(@Autowired ExternalServiceExecutor restExecutorService) {
+        this.restExecutorService = restExecutorService;
+    }
+
     @Async
     public Future<Map<String, List<ShipmentType>>> getShipments(List<String> shipment){
         if (CollectionUtils.isEmpty(shipment)){

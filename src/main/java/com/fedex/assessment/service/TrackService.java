@@ -16,9 +16,13 @@ import java.util.concurrent.Future;
 
 @Service
 public class TrackService {
-
     public final static String TRACKING_PATH = "/track";
-    @Autowired private ExternalServiceExecutor restExecutorService;
+    private final ExternalServiceExecutor restExecutorService;
+
+    public TrackService(@Autowired ExternalServiceExecutor restExecutorService) {
+        this.restExecutorService = restExecutorService;
+    }
+
     @Async
     public Future<Map<String, TrackStatus>> getTrack(List<String> tracking){
         if (CollectionUtils.isEmpty(tracking)){

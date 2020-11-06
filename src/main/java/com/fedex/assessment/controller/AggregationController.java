@@ -25,9 +25,12 @@ import java.util.List;
 public class AggregationController {
     private static Logger logger = LoggerFactory.getLogger(AggregationController.class);
 
+    private final AggregationService aggregationService;
 
-    @Autowired
-    private AggregationService aggregationService;
+    public AggregationController(@Autowired AggregationService aggregationService) {
+        this.aggregationService = aggregationService;
+    }
+
     @RequestMapping(path= "/aggregation", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get aggregated response from pricing, track and shipment services", response = Result.class)
     public Result getAggregation(

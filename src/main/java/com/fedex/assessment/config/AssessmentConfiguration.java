@@ -41,13 +41,13 @@ public class AssessmentConfiguration {
 
 
     @Bean
-    public ExternalServiceExecutor restExecutorService(@Autowired @Qualifier("restExecutor") ExternalServiceExecutor restExecutorService){
-        return enableBulkService ? new BulkExternalServiceExecutor(restExecutorService) : restExecutorService;
+    public ExternalServiceExecutor restExecutorService(@Autowired @Qualifier("restExecutor") ExternalServiceExecutor restExecutorService, @Autowired ExecutorService service){
+        return enableBulkService ? new BulkExternalServiceExecutor(restExecutorService, service) : restExecutorService;
     }
 
     @Bean("restExecutor")
-    public ExternalServiceExecutorImpl restExecutorServiceImpl(){
-        return new ExternalServiceExecutorImpl();
+    public ExternalServiceExecutorImpl restExecutorServiceImpl(@Autowired RestTemplate template){
+        return new ExternalServiceExecutorImpl(template);
     }
     @Bean
     public ExecutorService cachedThreadPool() {
