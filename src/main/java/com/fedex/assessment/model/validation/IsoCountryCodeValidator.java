@@ -12,6 +12,7 @@ public class IsoCountryCodeValidator implements
 
     private static final Set<String> ISO_COUNTRIES = new HashSet<>
             (Arrays.asList(Locale.getISOCountries()));
+
     @Override
     public boolean isValid(String code, ConstraintValidatorContext constraintValidatorContext) {
         return ISO_COUNTRIES.contains(code);

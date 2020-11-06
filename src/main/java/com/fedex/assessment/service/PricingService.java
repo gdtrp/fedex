@@ -23,11 +23,12 @@ public class PricingService {
     }
 
     @Async
-    public Future<Map<String, Float>> getPricing(List<String> pricing){
-        if (CollectionUtils.isEmpty(pricing)){
+    public Future<Map<String, Float>> getPricing(List<String> pricing) {
+        if (CollectionUtils.isEmpty(pricing)) {
             return new AsyncResult<>(null);
         }
         return new AsyncResult<>(restExecutorService.getValue(PRICING_PATH, pricing,
-                new ParameterizedTypeReference<HashMap<String, Float>>() {}));
+                new ParameterizedTypeReference<HashMap<String, Float>>() {
+                }));
     }
 }

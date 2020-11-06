@@ -24,38 +24,44 @@ import java.util.concurrent.Executors;
 @Configuration
 @EnableAsync
 public class AssessmentConfiguration {
-    @Value("${service.bulk.enabled:true}") boolean enableBulkService;
-    @Value("${service.connectionTimeout:30}") int connectionTimeout;
-    @Value("${service.readTimeout:30}") int readTimeout;
+    @Value("${service.bulk.enabled:true}")
+    boolean enableBulkService;
+    @Value("${service.connectionTimeout:30}")
+    int connectionTimeout;
+    @Value("${service.readTimeout:30}")
+    int readTimeout;
+
     @Bean
-    public ObjectMapper mapper(){
+    public ObjectMapper mapper() {
         return new ObjectMapper();
     }
+
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
         return restTemplateBuilder
                 .setConnectTimeout(Duration.of(connectionTimeout, ChronoUnit.SECONDS))
-           .setReadTimeout(Duration.of(readTimeout, ChronoUnit.SECONDS))
-           .build();
+                .setReadTimeout(Duration.of(readTimeout, ChronoUnit.SECONDS))
+                .build();
     }
 
 
     @Bean
-    public ExternalServiceExecutor restExecutorService(@Autowired @Qualifier("restExecutor") ExternalServiceExecutor restExecutorService, @Autowired ExecutorService service){
+    public ExternalServiceExecutor restExecutorService(@Autowired @Qualifier("restExecutor") ExternalServiceExecutor restExecutorService, @Autowired ExecutorService service) {
         return enableBulkService ? new BulkExternalServiceExecutor(restExecutorService, service) : restExecutorService;
     }
 
     @Bean("restExecutor")
-    public ExternalServiceExecutorImpl restExecutorServiceImpl(@Autowired RestTemplate template){
+    public ExternalServiceExecutorImpl restExecutorServiceImpl(@Autowired RestTemplate template) {
         return new ExternalServiceExecutorImpl(template);
     }
+
     @Bean
     public ExecutorService cachedThreadPool() {
         return Executors.newCachedThreadPool();
     }
 
     @Bean
-    public TaskExecutor taskExecutor () {
+    public TaskExecutor taskExecutor() {
         return new ConcurrentTaskExecutor(
                 Executors.newCachedThreadPool());
     }

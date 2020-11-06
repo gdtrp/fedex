@@ -13,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.Size;
@@ -23,7 +26,7 @@ import java.util.List;
 @Validated
 @Api(value = "Aggregation REST Controller")
 public class AggregationController {
-    private static Logger logger = LoggerFactory.getLogger(AggregationController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AggregationController.class);
 
     private final AggregationService aggregationService;
 
@@ -31,12 +34,12 @@ public class AggregationController {
         this.aggregationService = aggregationService;
     }
 
-    @GetMapping(path= "/aggregation", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/aggregation", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Get aggregated response from pricing, track and shipment services", response = Result.class)
     public Result getAggregation(
-            @ApiParam(value = "ISO country code list")  @RequestParam(name = "pricing", required = false) List<@IsoCountryCode  String> pricing,
-            @ApiParam(value = "9-digit order numbers list")  @RequestParam(name="track", required = false) List<@Size(min = 9, max = 9)  String> tracking,
-            @ApiParam(value = "9-digit order numbers list")  @RequestParam(name = "shipments", required = false) List<@Size(min = 9, max = 9) String> shipments){
+            @ApiParam(value = "ISO country code list") @RequestParam(name = "pricing", required = false) List<@IsoCountryCode String> pricing,
+            @ApiParam(value = "9-digit order numbers list") @RequestParam(name = "track", required = false) List<@Size(min = 9, max = 9) String> tracking,
+            @ApiParam(value = "9-digit order numbers list") @RequestParam(name = "shipments", required = false) List<@Size(min = 9, max = 9) String> shipments) {
         logger.info("received request. pricing: {} track: {} shipments: {}", pricing, tracking, shipments);
         return aggregationService.getAggregation(pricing, tracking, shipments);
     }

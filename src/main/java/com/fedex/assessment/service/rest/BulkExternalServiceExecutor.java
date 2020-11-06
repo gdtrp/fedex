@@ -17,93 +17,37 @@ import java.util.stream.Collectors;
 
 public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
 
-    private static final  Logger logger = LoggerFactory.getLogger(BulkExternalServiceExecutor.class);
-
-
-    @Value("${service.bulk.flushInterval:5}") private int flushInterval;
+    private static final Logger logger = LoggerFactory.getLogger(BulkExternalServiceExecutor.class);
     private static final int BULK_QUEUE_CAPACITY = 1000;
-
-    private Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
-    private boolean started = true;
-
     private final ExternalServiceExecutor restExecutorService;
     private final ExecutorService service;
-    @Value("${service.bulk.size:5}") private int bulkSize;
-
-
+    @Value("${service.bulk.flushInterval:5}")
+    private int flushInterval;
+    private final Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
+    private boolean started = true;
+    @Value("${service.bulk.size:5}")
+    private int bulkSize;
 
 
     public BulkExternalServiceExecutor(@Autowired ExternalServiceExecutor restExecutorService,
-                                       @Autowired ExecutorService service){
+                                       @Autowired ExecutorService service) {
         this.restExecutorService = restExecutorService;
         this.service = service;
     }
+
     @PreDestroy
-    private void shutdown(){
+    private void shutdown() {
         started = false;
     }
-    private class BulkRequest{
-        private CountDownLatch latch;
-        private List<SingleRequest> singleRequests;
-        private AtomicInteger executed = new AtomicInteger(0);
-        private BulkRequest(List<String> requests){
-            this.latch = new CountDownLatch(1);
-            this.singleRequests = requests.stream().map(x -> new SingleRequest(this, x)).collect(Collectors.toList());
-        }
-    }
-     private class SingleRequest{
-        private String request;
-        private Object response;
-        private BulkRequest bulkRequest;
-        private SingleRequest(BulkRequest bulkRequest, String request){
-            this.request = request;
-            this.bulkRequest = bulkRequest;
-        }
-        private void setResponse(Object response){
-            this.response = response;
-            if (this.bulkRequest.executed.incrementAndGet() == this.bulkRequest.singleRequests.size()){
-                this.bulkRequest.latch.countDown();
-            }
 
-        }
-    }
-    public <P> void init(String path, ParameterizedTypeReference<HashMap<String, P>> responseType){
+    public <P> void init(String path, ParameterizedTypeReference<HashMap<String, P>> responseType) {
         BlockingQueue<BulkRequest> prev = globalParams.putIfAbsent(path, new ArrayBlockingQueue<>(BULK_QUEUE_CAPACITY));
-        if (prev == null){
-            service.execute(()-> {
-                List<SingleRequest> params = new ArrayList<>();
-                while(started){
-                    try {
-                        boolean readyForExecute;
-                        BlockingQueue<BulkRequest> queue = globalParams.get(path);
-                        if (flushInterval > 0){
-                            BulkRequest element = queue.poll(flushInterval, TimeUnit.SECONDS);
-                            if (element != null){
-                                params.addAll(element.singleRequests);
-                            }
-                            readyForExecute = params.size() >= bulkSize || (!params.isEmpty() && element == null);
-                        }else{
-                            params.addAll(queue.take().singleRequests);
-                            readyForExecute = params.size() >=  bulkSize;
-                        }
-                        if (readyForExecute){
-                            final List<SingleRequest> clone = new ArrayList<>(params);
-                            service.execute(() -> {
-                                Map<String, P> result = restExecutorService.getValue(path, clone.stream().map(x -> x.request).collect(Collectors.toList()), responseType);
-                                logger.info("path {} got result : {}", path, result);
-                                clone.forEach(x -> x.setResponse(result != null ? result.get(x.request) : null));
-                            });
-                            params = new ArrayList<>(bulkSize);
-                        }
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        started = false;
-                    }
-                }
-            });
+        if (prev == null) {
+            service.execute(new BulkExecutor<>(path, responseType));
         }
     }
-    public <P> Map<String, P> getValue(String path, List<String> params, ParameterizedTypeReference<HashMap<String, P>> responseType){
+
+    public <P> Map<String, P> getValue(String path, List<String> params, ParameterizedTypeReference<HashMap<String, P>> responseType) {
         init(path, responseType);
         BulkRequest request = new BulkRequest(params);
         globalParams.get(path).add(request);
@@ -113,10 +57,86 @@ public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
             request.singleRequests.forEach(x -> result.put(x.request, (P) x.response));
             return result;
         } catch (InterruptedException e) {
-            Map<String , P > result = new HashMap<>();
+            Map<String, P> result = new HashMap<>();
             params.forEach(x -> result.put(x, null));
             Thread.currentThread().interrupt();
             return result;
+        }
+    }
+
+    private class BulkRequest {
+        private final CountDownLatch latch;
+        private final List<SingleRequest> singleRequests;
+        private final AtomicInteger executed = new AtomicInteger(0);
+
+        private BulkRequest(List<String> requests) {
+            this.latch = new CountDownLatch(1);
+            this.singleRequests = requests.stream().map(x -> new SingleRequest(this, x)).collect(Collectors.toList());
+        }
+    }
+
+    private class SingleRequest {
+        private final String request;
+        private Object response;
+        private final BulkRequest bulkRequest;
+
+        private SingleRequest(BulkRequest bulkRequest, String request) {
+            this.request = request;
+            this.bulkRequest = bulkRequest;
+        }
+
+        private void setResponse(Object response) {
+            this.response = response;
+            if (this.bulkRequest.executed.incrementAndGet() == this.bulkRequest.singleRequests.size()) {
+                this.bulkRequest.latch.countDown();
+            }
+
+        }
+    }
+
+    private class BulkExecutor<P> implements Runnable {
+        private final String path;
+        private final ParameterizedTypeReference<HashMap<String, P>> responseType;
+
+        private BulkExecutor(String path, ParameterizedTypeReference<HashMap<String, P>> responseType) {
+            this.path = path;
+            this.responseType = responseType;
+        }
+
+        @Override
+        public void run() {
+            List<SingleRequest> params = new ArrayList<>();
+            while (started) {
+                try {
+                    params.addAll(extractParams());
+                    boolean readyToExecute = flushInterval == 0 ? params.size() >= bulkSize : params.size() >= bulkSize || !params.isEmpty();
+                    if (readyToExecute) {
+                        final List<SingleRequest> clone = new ArrayList<>(params);
+                        service.execute(() -> {
+                            Map<String, P> result = restExecutorService.getValue(path, clone.stream().map(x -> x.request).collect(Collectors.toList()), responseType);
+                            logger.info("path {} got result : {}", path, result);
+                            clone.forEach(x -> x.setResponse(result != null ? result.get(x.request) : null));
+                        });
+                        params = new ArrayList<>(bulkSize);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    started = false;
+                }
+            }
+        }
+
+        private List<SingleRequest> extractParams() throws InterruptedException {
+            BlockingQueue<BulkRequest> queue = globalParams.get(path);
+            if (flushInterval > 0) {
+                BulkRequest element = queue.poll(flushInterval, TimeUnit.SECONDS);
+                if (element == null) {
+                    return new ArrayList<>();
+                }
+                return element.singleRequests;
+            } else {
+                return queue.take().singleRequests;
+            }
         }
     }
 }

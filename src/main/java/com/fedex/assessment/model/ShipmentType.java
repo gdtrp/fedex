@@ -1,5 +1,5 @@
 package com.fedex.assessment.model;
 
-public enum ShipmentType{
+public enum ShipmentType {
     envelope, box, pallet
 }

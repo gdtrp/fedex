@@ -22,23 +22,22 @@ public class ExternalServiceExecutorImpl implements ExternalServiceExecutor {
     private static final Logger logger = LoggerFactory.getLogger(ExternalServiceExecutorImpl.class);
     private static final String PARAM_NAME = "q";
     private static final String DELIMITER = ",";
-
-
+    private final RestTemplate template;
     @Value("${service.host}")
     private String host;
-    private final RestTemplate template;
 
-    public ExternalServiceExecutorImpl(@Autowired RestTemplate template){
+    public ExternalServiceExecutorImpl(@Autowired RestTemplate template) {
         this.template = template;
     }
-    public <P> Map<String, P> getValue(String path, List<String> params, ParameterizedTypeReference<HashMap<String, P>> responseType){
+
+    public <P> Map<String, P> getValue(String path, List<String> params, ParameterizedTypeReference<HashMap<String, P>> responseType) {
         URI uri = UriComponentsBuilder.fromHttpUrl(host).path(path).queryParam(PARAM_NAME, params.stream().collect(Collectors.joining(DELIMITER))).build().toUri();
-        RequestEntity request = RequestEntity.get(uri).accept(MediaType.APPLICATION_JSON).build();
-        try{
+        RequestEntity<Void> request = RequestEntity.get(uri).accept(MediaType.APPLICATION_JSON).build();
+        try {
             return template.exchange(request, responseType).getBody();
-        }catch(RestClientException e){
-            logger.warn("error during execution {}. Cause: {}", uri , e.getLocalizedMessage());
-            Map<String , P > result = new HashMap<>();
+        } catch (RestClientException e) {
+            logger.warn("error during execution {}. Cause: {}", uri, e.getLocalizedMessage());
+            Map<String, P> result = new HashMap<>();
             params.forEach(x -> result.put(x, null));
             return result;
         }

@@ -1,8 +1,8 @@
 package com.fedex.assessment.service;
 
-import com.fedex.assessment.model.TrackStatus;
 import com.fedex.assessment.model.Result;
 import com.fedex.assessment.model.ShipmentType;
+import com.fedex.assessment.model.TrackStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +21,13 @@ public class AggregationService {
     private final ShipmentService shipmentService;
     private final TrackService trackingService;
 
-    public AggregationService(@Autowired PricingService pricingService,@Autowired ShipmentService shipmentService,@Autowired TrackService trackingService) {
+    public AggregationService(@Autowired PricingService pricingService, @Autowired ShipmentService shipmentService, @Autowired TrackService trackingService) {
         this.pricingService = pricingService;
         this.shipmentService = shipmentService;
         this.trackingService = trackingService;
     }
 
-    public Result getAggregation(List<String> pricing, List<String> tracking, List<String> shipment){
+    public Result getAggregation(List<String> pricing, List<String> tracking, List<String> shipment) {
         Result result = new Result();
         Future<Map<String, Float>> pricingFuture = pricingService.getPricing(pricing);
         Future<Map<String, List<ShipmentType>>> shipmentFuture = shipmentService.getShipments(shipment);

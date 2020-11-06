@@ -24,11 +24,12 @@ public class ShipmentService {
     }
 
     @Async
-    public Future<Map<String, List<ShipmentType>>> getShipments(List<String> shipment){
-        if (CollectionUtils.isEmpty(shipment)){
+    public Future<Map<String, List<ShipmentType>>> getShipments(List<String> shipment) {
+        if (CollectionUtils.isEmpty(shipment)) {
             return new AsyncResult<>(null);
         }
         return new AsyncResult<>(restExecutorService.getValue(SHIPMENT_PATH, shipment,
-                new ParameterizedTypeReference<HashMap<String, List<ShipmentType>>>() {}));
+                new ParameterizedTypeReference<HashMap<String, List<ShipmentType>>>() {
+                }));
     }
 }

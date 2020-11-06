@@ -24,11 +24,12 @@ public class TrackService {
     }
 
     @Async
-    public Future<Map<String, TrackStatus>> getTrack(List<String> tracking){
-        if (CollectionUtils.isEmpty(tracking)){
+    public Future<Map<String, TrackStatus>> getTrack(List<String> tracking) {
+        if (CollectionUtils.isEmpty(tracking)) {
             return new AsyncResult<>(null);
         }
         return new AsyncResult<>(restExecutorService.getValue(TRACKING_PATH, tracking,
-                new ParameterizedTypeReference<HashMap<String, TrackStatus>>() {}));
+                new ParameterizedTypeReference<HashMap<String, TrackStatus>>() {
+                }));
     }
 }
