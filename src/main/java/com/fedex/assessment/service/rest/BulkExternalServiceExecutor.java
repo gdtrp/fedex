@@ -21,12 +21,13 @@ public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
     private static final int BULK_QUEUE_CAPACITY = 1000;
     private final ExternalServiceExecutor restExecutorService;
     private final ExecutorService service;
+    private final ExecutorService bulkExecutorService = Executors.newCachedThreadPool();
+    private final Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
     @Value("${service.bulk.flushInterval:5}")
     private int flushInterval;
-    private final Map<String, BlockingQueue<BulkRequest>> globalParams = new ConcurrentHashMap<>();
-    private boolean started = true;
     @Value("${service.bulk.size:5}")
     private int bulkSize;
+    private boolean started = true;
 
 
     public BulkExternalServiceExecutor(@Autowired ExternalServiceExecutor restExecutorService,
@@ -40,10 +41,10 @@ public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
         started = false;
     }
 
-    public <P> void init(String path, ParameterizedTypeReference<HashMap<String, P>> responseType) {
+    private <P> void init(String path, ParameterizedTypeReference<HashMap<String, P>> responseType) {
         BlockingQueue<BulkRequest> prev = globalParams.putIfAbsent(path, new ArrayBlockingQueue<>(BULK_QUEUE_CAPACITY));
         if (prev == null) {
-            service.execute(new BulkExecutor<>(path, responseType));
+            bulkExecutorService.execute(new BulkExecutor<>(path, responseType));
         }
     }
 
@@ -77,8 +78,8 @@ public class BulkExternalServiceExecutor implements ExternalServiceExecutor {
 
     private class SingleRequest {
         private final String request;
-        private Object response;
         private final BulkRequest bulkRequest;
+        private Object response;
 
         private SingleRequest(BulkRequest bulkRequest, String request) {
             this.request = request;
